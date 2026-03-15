@@ -2,9 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { getOrigin } from "@/lib/origin";
 import { kvGet, addConnectedRepo, removeConnectedRepo, getConnectedRepos } from "@/lib/store";
 import { getSessionId } from "@/lib/session";
+import { processPullRequestPayload } from "@/lib/pr-processing";
 
 async function getToken(sid: string): Promise<string | undefined> {
   return sid ? kvGet(`github_token:${sid}`) : undefined;
+}
+
+async function backfillOpenPullRequests(repoFullName: string, token: string, appUrl: string): Promise<number> {
+  const [owner, repo] = repoFullName.split("/");
+  const pullsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=20`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+  });
+
+  let backfilled = 0;
+  if (!pullsRes.ok) return backfilled;
+
+  const pulls = await pullsRes.json() as Array<Record<string, unknown>>;
+  for (const pull of pulls) {
+    const result = await processPullRequestPayload({
+      action: "opened",
+      pull_request: pull,
+      repository: { full_name: repoFullName },
+    }, appUrl);
+    if (!result.skipped) backfilled++;
+  }
+
+  return backfilled;
 }
 
 export async function POST(req: NextRequest) {
@@ -27,7 +50,8 @@ export async function POST(req: NextRequest) {
     const hooks = await listRes.json() as Array<{ config: { url: string }; id: number }>;
     if (hooks.find((h) => h.config.url === `${appUrl}/api/webhook`)) {
       await addConnectedRepo(repoFullName, sid);
-      return NextResponse.json({ ok: true, alreadyExists: true });
+      const backfilled = await backfillOpenPullRequests(repoFullName, token, appUrl);
+      return NextResponse.json({ ok: true, alreadyExists: true, backfilled });
     }
   }
 
@@ -46,7 +70,8 @@ export async function POST(req: NextRequest) {
   }
 
   await addConnectedRepo(repoFullName, sid);
-  return NextResponse.json({ ok: true });
+  const backfilled = await backfillOpenPullRequests(repoFullName, token, appUrl);
+  return NextResponse.json({ ok: true, backfilled });
 }
 
 export async function GET(req: NextRequest) {

@@ -1,8 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { use } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink, Loader2, Check, AlertCircle, GitPullRequest } from "lucide-react";
+
+interface PhantomProvider {
+  isPhantom?: boolean;
+  publicKey?: { toString(): string };
+  connect(options?: { onlyIfTrusted?: boolean }): Promise<{ publicKey: { toString(): string } }>;
+  disconnect(): Promise<void>;
+  on(event: "accountChanged", handler: (publicKey: { toString(): string } | null) => void): void;
+  removeListener(event: "accountChanged", handler: (publicKey: { toString(): string } | null) => void): void;
+}
+
+declare global {
+  interface Window {
+    solana?: PhantomProvider;
+  }
+}
 
 interface Claim {
   token: string;
@@ -20,9 +35,8 @@ interface Claim {
   createdAt: string;
 }
 
-
-function ethFromScore(score: number) {
-  return ((score / 100) * 0.002).toFixed(6);
+function rewardFromScore(score: number) {
+  return ((score / 100) * 0.05).toFixed(6);
 }
 
 export default function ClaimPage({ params }: { params: Promise<{ token: string }> }) {
@@ -31,6 +45,9 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [wallet, setWallet] = useState("");
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [hasPhantom, setHasPhantom] = useState(false);
+  const [connectingWallet, setConnectingWallet] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [result, setResult] = useState<{ txHash: string; explorerUrl: string; amountEth: string } | null>(null);
   const [error, setError] = useState("");
@@ -38,16 +55,76 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
   useEffect(() => {
     fetch(`/api/claim/${token}`)
       .then(async (r) => {
-        if (r.status === 404) { setNotFound(true); return; }
+        if (r.status === 404) {
+          setNotFound(true);
+          return;
+        }
         setClaim(await r.json());
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [token]);
 
+  useEffect(() => {
+    const provider = window.solana;
+    if (!provider?.isPhantom) return;
+
+    setHasPhantom(true);
+    provider.connect({ onlyIfTrusted: true })
+      .then(({ publicKey }) => {
+        const nextWallet = publicKey.toString();
+        setWallet(nextWallet);
+        setWalletConnected(true);
+      })
+      .catch(() => {});
+
+    const handleAccountChanged = (publicKey: { toString(): string } | null) => {
+      if (!publicKey) {
+        setWalletConnected(false);
+        return;
+      }
+      const nextWallet = publicKey.toString();
+      setWallet(nextWallet);
+      setWalletConnected(true);
+      setError("");
+    };
+
+    provider.on("accountChanged", handleAccountChanged);
+    return () => provider.removeListener("accountChanged", handleAccountChanged);
+  }, []);
+
+  const connectWallet = async () => {
+    const provider = window.solana;
+    if (!provider?.isPhantom) {
+      setError("Phantom is not available in this browser");
+      return;
+    }
+
+    setConnectingWallet(true);
+    setError("");
+    try {
+      const { publicKey } = await provider.connect();
+      setWallet(publicKey.toString());
+      setWalletConnected(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Wallet connection failed");
+    } finally {
+      setConnectingWallet(false);
+    }
+  };
+
+  const disconnectWallet = async () => {
+    const provider = window.solana;
+    if (!provider?.isPhantom) return;
+    try {
+      await provider.disconnect();
+    } catch {}
+    setWalletConnected(false);
+  };
+
   const submit = async () => {
-    if (!wallet || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) {
-      setError("Enter a valid Solana wallet address (base58)");
+    if (!wallet || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet.trim())) {
+      setError("Enter a valid Solana wallet address");
       return;
     }
     setClaiming(true);
@@ -81,7 +158,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
         <div style={{ textAlign: "center", maxWidth: "360px", padding: "24px" }}>
-          <div style={{ fontSize: "32px", marginBottom: "16px" }}>🔍</div>
+          <div style={{ fontSize: "32px", marginBottom: "16px" }}>?</div>
           <h1 style={{ fontSize: "18px", fontWeight: 600, color: "#000", marginBottom: "8px" }}>Claim not found</h1>
           <p style={{ fontSize: "13px", color: "#71717a" }}>This link may have expired or is invalid.</p>
         </div>
@@ -89,24 +166,21 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     );
   }
 
-  const amountEth = ethFromScore(claim.score);
+  const amountEth = rewardFromScore(claim.score);
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
       <div style={{ width: "100%", maxWidth: "460px" }}>
-        {/* Logo */}
         <a href="/" style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px", justifyContent: "center", textDecoration: "none" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="2"  width="20" height="5" rx="2.5" fill="#000" />
-            <rect x="2" y="9"  width="13" height="5" rx="2.5" fill="#10b981" />
+            <rect x="2" y="2" width="20" height="5" rx="2.5" fill="#000" />
+            <rect x="2" y="9" width="13" height="5" rx="2.5" fill="#10b981" />
             <rect x="2" y="16" width="20" height="5" rx="2.5" fill="#000" />
           </svg>
           <span style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>GitPay</span>
         </a>
 
-        {/* Card */}
         <div style={{ border: "1px solid #e4e4e7", borderRadius: "16px", overflow: "hidden", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-          {/* PR info */}
           <div style={{ padding: "24px", borderBottom: "1px solid #e4e4e7" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <img
@@ -121,8 +195,12 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
               </div>
             </div>
 
-            <a href={claim.prUrl} target="_blank" rel="noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", border: "1px solid #e4e4e7", borderRadius: "8px", textDecoration: "none", background: "#fafafa" }}>
+            <a
+              href={claim.prUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", border: "1px solid #e4e4e7", borderRadius: "8px", textDecoration: "none", background: "#fafafa" }}
+            >
               <GitPullRequest size={14} style={{ color: "#71717a", flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: "12px", fontFamily: "Geist Mono, monospace", color: "#a1a1aa", marginBottom: "2px" }}>
@@ -134,10 +212,8 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
               </div>
               <ExternalLink size={12} style={{ color: "#a1a1aa", flexShrink: 0 }} />
             </a>
-
           </div>
 
-          {/* Reward + claim */}
           <div style={{ padding: "20px 24px" }}>
             {result ? (
               <div style={{ textAlign: "center", padding: "8px 0" }}>
@@ -148,10 +224,9 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                   {result.amountEth} SOL sent!
                 </div>
                 <p style={{ fontSize: "12px", color: "#71717a", marginBottom: "14px" }}>
-                  Your reward is on its way on Solana.
+                  Your reward was sent on Solana devnet.
                 </p>
-                <a href={result.explorerUrl} target="_blank" rel="noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "#3b82f6", fontWeight: 500, textDecoration: "none" }}>
+                <a href={result.explorerUrl} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "12px", color: "#3b82f6", fontWeight: 500, textDecoration: "none" }}>
                   View transaction
                   <ArrowUpRight size={12} />
                 </a>
@@ -164,22 +239,55 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
               <>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "16px" }}>
                   <div style={{ fontSize: "24px", fontWeight: 700, color: "#000" }}>{amountEth} SOL</div>
-                  <div style={{ fontSize: "12px", color: "#71717a" }}>on Solana</div>
+                  <div style={{ fontSize: "12px", color: "#71717a" }}>on devnet</div>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+                  <button
+                    onClick={walletConnected ? disconnectWallet : connectWallet}
+                    disabled={connectingWallet || !hasPhantom}
+                    style={{
+                      flex: 1,
+                      padding: "10px 12px",
+                      border: "1px solid #e4e4e7",
+                      borderRadius: "8px",
+                      background: walletConnected ? "#f4f4f5" : "#fff",
+                      color: walletConnected ? "#3f3f46" : "#000",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      cursor: connectingWallet || !hasPhantom ? "not-allowed" : "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {connectingWallet
+                      ? "Connecting Phantom..."
+                      : walletConnected
+                        ? "Disconnect Phantom"
+                        : hasPhantom
+                          ? "Connect Phantom"
+                          : "Phantom not detected"}
+                  </button>
                 </div>
 
                 <div style={{ marginBottom: "12px" }}>
                   <label style={{ fontSize: "12px", fontWeight: 500, color: "#3f3f46", display: "block", marginBottom: "6px" }}>
-                    Your wallet address
+                    Wallet address
                   </label>
                   <input
                     type="text"
                     value={wallet}
                     onChange={(e) => { setWallet(e.target.value); setError(""); }}
-                    placeholder="e.g. 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+                    placeholder="Connect Phantom or paste a Solana wallet address"
                     style={{
-                      width: "100%", padding: "9px 12px", border: `1px solid ${error ? "#ef4444" : "#e4e4e7"}`,
-                      borderRadius: "8px", fontSize: "13px", fontFamily: "Geist Mono, monospace",
-                      outline: "none", color: "#000", background: "#fff",
+                      width: "100%",
+                      padding: "9px 12px",
+                      border: `1px solid ${error ? "#ef4444" : "#e4e4e7"}`,
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontFamily: "Geist Mono, monospace",
+                      outline: "none",
+                      color: "#000",
+                      background: "#fff",
                     }}
                   />
                   {error && (
@@ -194,12 +302,21 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                   onClick={submit}
                   disabled={claiming || !wallet}
                   style={{
-                    width: "100%", padding: "10px", background: claiming || !wallet ? "#f4f4f5" : "#000",
+                    width: "100%",
+                    padding: "10px",
+                    background: claiming || !wallet ? "#f4f4f5" : "#000",
                     color: claiming || !wallet ? "#a1a1aa" : "#fff",
-                    border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 500,
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: 500,
                     cursor: claiming || !wallet ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                    fontFamily: "inherit", transition: "background 0.15s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    fontFamily: "inherit",
+                    transition: "background 0.15s",
                   }}
                 >
                   {claiming ? (
@@ -208,7 +325,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                 </button>
 
                 <p style={{ fontSize: "11px", color: "#a1a1aa", marginTop: "10px", textAlign: "center" }}>
-                  Solana devnet only. Your reward is {amountEth} SOL.
+                  Devnet payout only. Connect Phantom or paste a Solana address to receive {amountEth} SOL.
                 </p>
               </>
             )}
@@ -216,7 +333,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
         </div>
 
         <p style={{ textAlign: "center", fontSize: "11px", color: "#d4d4d8", marginTop: "20px" }}>
-          Powered by GitPay · AI scoring by Claude · Solana devnet
+          Powered by GitPay | AI scoring by Gemini | Solana devnet
         </p>
       </div>
     </div>

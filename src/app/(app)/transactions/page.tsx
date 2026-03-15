@@ -79,7 +79,7 @@ export default function TransactionsPage() {
             <div style={{ border: "1px dashed #e4e4e7", borderRadius: "12px", padding: "48px 24px", textAlign: "center" }}>
               <p style={{ fontSize: "14px", color: "#71717a", marginBottom: "6px" }}>No transactions yet</p>
               <p style={{ fontSize: "12px", color: "#a1a1aa" }}>
-                Transactions appear here once a contributor claims their reward.
+                On-chain devnet payouts appear here once a contributor claims their reward.
               </p>
             </div>
           ) : (

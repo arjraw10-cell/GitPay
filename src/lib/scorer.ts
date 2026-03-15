@@ -1,12 +1,28 @@
-import Replicate from "replicate";
-
 export interface ScoreResult {
   score: number;
   reasoning: string;
   category: "bug_fix" | "feature" | "review" | "documentation" | "trivial";
 }
 
-const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-3-flash-preview";
+
+function parseResult(text: string): ScoreResult | undefined {
+  const cleaned = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (!match) return undefined;
+
+  const result = JSON.parse(match[0]) as ScoreResult;
+  if (typeof result.score !== "number" || !result.reasoning || !result.category) {
+    return undefined;
+  }
+
+  return {
+    score: Math.max(0, Math.min(100, Math.round(result.score))),
+    reasoning: result.reasoning,
+    category: result.category,
+  };
+}
 
 export async function scorePR(pr: {
   title: string;
@@ -39,32 +55,47 @@ Scoring guide:
 Respond with ONLY this JSON (no markdown, no code fences):
 {"score": <0-100>, "reasoning": "<1 clear sentence about what this does and why it's valuable>", "category": "<bug_fix|feature|review|documentation|trivial>"}`;
 
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return { score: 20, reasoning: "Contribution reviewed - Gemini API key not configured.", category: "trivial" };
+  }
+
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const output = await replicate.run("google/gemini-3-flash", {
-        input: {
-          prompt,
-          temperature: 0.2,
+      const res = await fetch(`${GEMINI_API_URL}/${DEFAULT_MODEL}:generateContent?key=${apiKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json",
+          },
+        }),
       });
+      if (!res.ok) throw new Error(`Gemini request failed with ${res.status}`);
 
-      let text = Array.isArray(output) ? output.join("") : String(output);
-text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) text = match[0];
-
-      const result = JSON.parse(text) as ScoreResult;
-      if (typeof result.score === "number" && result.reasoning && result.category) {
-        return {
-          score: Math.max(0, Math.min(100, Math.round(result.score))),
-          reasoning: result.reasoning,
-          category: result.category,
-        };
-      }
+      const data = await res.json() as {
+        candidates?: Array<{
+          content?: {
+            parts?: Array<{ text?: string }>;
+          };
+        }>;
+      };
+      const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim() || "";
+      const result = parseResult(text);
+      if (result) return result;
     } catch {
       if (attempt === 2) break;
     }
   }
 
-  return { score: 20, reasoning: "Contribution reviewed — scoring unavailable.", category: "trivial" };
+  return { score: 20, reasoning: "Contribution reviewed - scoring unavailable.", category: "trivial" };
 }

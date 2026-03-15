@@ -106,7 +106,7 @@ function PRRow({ c, appUrl, isLast }: { c: Claim; appUrl: string; isLast: boolea
           {c.explorerUrl && (
             <a href={c.explorerUrl} target="_blank" rel="noreferrer"
               style={{ fontSize: "12px", color: "#10b981", fontWeight: 500, textDecoration: "none", marginLeft: "12px" }}>
-              view on Solana →
+              view payout record →
             </a>
           )}
         </div>

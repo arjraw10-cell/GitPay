@@ -14,14 +14,15 @@ export async function GET(req: NextRequest) {
     client_id: clientId,
     scope: "repo admin:repo_hook",
     state,
+    redirect_uri: `${origin}/api/github/callback`,
   });
 
-  return NextResponse.redirect(`https://github.com/login/oauth/authorize?${params}`);
+  return NextResponse.redirect(new URL(`https://github.com/login/oauth/authorize?${params.toString()}`));
 }
 
 export async function DELETE() {
   const g = global as typeof global & { _githubToken?: string };
   g._githubToken = undefined;
-  kvSet("github_token", "");
+  await kvSet("github_token", "");
   return NextResponse.json({ ok: true });
 }

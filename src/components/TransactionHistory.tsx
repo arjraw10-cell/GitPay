@@ -14,7 +14,7 @@ interface Transaction {
 }
 
 function shortHash(h: string) {
-  return `${h.slice(0, 8)}…${h.slice(-6)}`;
+  return `${h.slice(0, 8)}...${h.slice(-6)}`;
 }
 
 export default function TransactionHistory() {
@@ -54,11 +54,10 @@ export default function TransactionHistory() {
           className="card border-dashed p-8 text-center"
           style={{ color: "#2a2a2a", borderStyle: "dashed" }}
         >
-          <p className="text-sm">No payouts yet — trigger a round to send SOL on Solana</p>
+          <p className="text-sm">No payouts yet - trigger a claim to send devnet SOL</p>
         </div>
       ) : (
         <div className="relative pl-5">
-          {/* Vertical line */}
           <div
             className="absolute left-0 top-2 bottom-2 w-px"
             style={{ background: "linear-gradient(to bottom, #333, transparent)" }}
@@ -97,7 +96,7 @@ export default function TransactionHistory() {
 
                     <div className="flex items-center gap-3">
                       <a
-                        href={`https://solscan.io/tx/${tx.txHash}`}
+                        href={tx.txHash ? `https://explorer.solana.com/tx/${tx.txHash}?cluster=devnet` : "/transactions"}
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-1 text-xs opacity-40 hover:opacity-90 transition-opacity"

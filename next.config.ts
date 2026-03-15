@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: [
+    "https://nonapostolical-breezy-hildegarde.ngrok-free.dev",
+  ],
   turbopack: {
     root: __dirname,
   },

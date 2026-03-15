@@ -9,8 +9,8 @@ import {
 } from "@solana/web3.js";
 
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
-const EXPLORER_BASE = process.env.SOLANA_EXPLORER_BASE || "https://explorer.solana.com/tx";
-const CLUSTER_PARAM = process.env.SOLANA_CLUSTER_PARAM || "?cluster=devnet";
+export const EXPLORER_BASE = process.env.SOLANA_EXPLORER_BASE || "https://explorer.solana.com/tx";
+export const CLUSTER_PARAM = process.env.SOLANA_CLUSTER_PARAM || "?cluster=devnet";
 
 function getConnection() {
   return new Connection(RPC_URL, "confirmed");
@@ -48,7 +48,5 @@ export async function executePayout(toAddress: string, amountSol: string): Promi
       lamports: Math.floor(parseFloat(amountSol) * LAMPORTS_PER_SOL),
     })
   );
-  return await sendAndConfirmTransaction(connection, tx, [keypair]);
+  return sendAndConfirmTransaction(connection, tx, [keypair]);
 }
-
-export { EXPLORER_BASE, CLUSTER_PARAM };

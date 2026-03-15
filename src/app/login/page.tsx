@@ -26,11 +26,16 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", fontFamily: "inherit" }}>
-      {/* Left */}
-      <div style={{
-        width: "50%", background: "#fff", borderRight: "1px solid #e4e4e7",
-        display: "flex", flexDirection: "column", padding: "48px 56px",
-      }}>
+      <div
+        style={{
+          width: "50%",
+          background: "#fff",
+          borderRight: "1px solid #e4e4e7",
+          display: "flex",
+          flexDirection: "column",
+          padding: "48px 56px",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "64px" }}>
           <GitPayLogoBlack />
           <span style={{ fontWeight: 600, fontSize: "15px", color: "#000", letterSpacing: "-0.01em" }}>GitPay</span>
@@ -41,13 +46,13 @@ export default function LoginPage() {
             Autonomous rewards for open source contributors
           </p>
           <p style={{ fontSize: "14px", color: "#71717a", lineHeight: 1.7, margin: "0 0 48px" }}>
-            Connect your GitHub org, GitPay watches for PRs, scores them with AI, and pays contributors in SOL automatically.
+            Connect your GitHub org, GitPay watches for PRs, scores them with AI, and pays contributors in Solana devnet automatically.
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {[
               ["AI Scoring", "Every PR graded by Gemini on quality and impact"],
-              ["Instant Payouts", "Contributors claim SOL directly to their wallet"],
+              ["Instant Payouts", "Contributors claim devnet SOL directly to their wallet"],
               ["Zero Config", "Install a webhook and the rest is automatic"],
             ].map(([title, desc]) => (
               <div key={title} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
@@ -62,26 +67,40 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right */}
-      <div style={{
-        width: "50%", background: "#fafafa",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: "40px",
-      }}>
+      <div
+        style={{
+          width: "50%",
+          background: "#fafafa",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "40px",
+        }}
+      >
         <div style={{ width: "100%", maxWidth: "320px" }}>
           <h1 style={{ fontSize: "22px", fontWeight: 600, color: "#000", margin: "0 0 8px" }}>
             Sign in to GitPay
           </h1>
           <p style={{ fontSize: "13px", color: "#71717a", margin: "0 0 32px", lineHeight: 1.6 }}>
-            Use your GitHub account. If you don&apos;t have a GitPay account yet, one will be created automatically.
+            Use your GitHub account. If you do not have a GitPay account yet, one will be created automatically.
           </p>
 
           <a
             href="/api/github/auth"
             style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-              width: "100%", padding: "11px 20px", background: "#000", color: "#fff",
-              borderRadius: "8px", fontSize: "14px", fontWeight: 500,
-              textDecoration: "none", boxSizing: "border-box",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              width: "100%",
+              padding: "11px 20px",
+              background: "#000",
+              color: "#fff",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: 500,
+              textDecoration: "none",
+              boxSizing: "border-box",
             }}
           >
             <Github size={16} />

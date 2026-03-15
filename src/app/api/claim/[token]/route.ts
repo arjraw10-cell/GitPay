@@ -19,25 +19,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
   if (!claim) return NextResponse.json({ error: "Claim not found" }, { status: 404 });
   if (claim.claimed) return NextResponse.json({ error: "Already claimed" }, { status: 409 });
   if (!isPayoutsEnabled()) {
-    return NextResponse.json({ error: "Payouts not configured" }, { status: 503 });
+    return NextResponse.json({ error: "Devnet payouts are not configured" }, { status: 503 });
   }
 
   const { walletAddress } = await req.json() as { walletAddress: string };
-  if (!walletAddress || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress)) {
-    return NextResponse.json({ error: "Invalid Solana wallet address" }, { status: 400 });
+  const normalizedWallet = walletAddress?.trim() || "";
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(normalizedWallet)) {
+    return NextResponse.json({ error: "Enter a valid Solana wallet address" }, { status: 400 });
   }
 
   const amountSol = ((claim.score / 100) * 0.05).toFixed(6);
 
   try {
-    const txHash = await executePayout(walletAddress, amountSol);
+    const txHash = await executePayout(normalizedWallet, amountSol);
     const explorerUrl = `${EXPLORER_BASE}/${txHash}${CLUSTER_PARAM}`;
 
-    await markClaimed(token, walletAddress, txHash, explorerUrl);
+    await markClaimed(token, normalizedWallet, txHash, explorerUrl);
     await addTransaction({
       txHash, explorerUrl,
       githubUsername: claim.githubUsername,
-      walletAddress, amountEth: amountSol,
+      walletAddress: normalizedWallet, amountEth: amountSol,
       score: claim.score, repo: claim.repo, prUrl: claim.prUrl,
       timestamp: new Date().toISOString(),
     });
