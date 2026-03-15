@@ -20,11 +20,6 @@ interface Claim {
   createdAt: string;
 }
 
-function scoreColor(s: number) {
-  if (s >= 60) return "#10b981";
-  if (s >= 30) return "#f59e0b";
-  return "#71717a";
-}
 
 function ethFromScore(score: number) {
   return ((score / 100) * 0.002).toFixed(6);
@@ -124,12 +119,6 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                 <div style={{ fontSize: "15px", fontWeight: 600, color: "#000" }}>@{claim.githubUsername}</div>
                 <div style={{ fontSize: "12px", color: "#71717a" }}>eligible for reward</div>
               </div>
-              <div style={{ marginLeft: "auto", textAlign: "right" }}>
-                <div style={{ fontSize: "28px", fontWeight: 700, color: scoreColor(claim.score), fontVariantNumeric: "tabular-nums" }}>
-                  {claim.score}
-                </div>
-                <div style={{ fontSize: "10px", color: "#a1a1aa" }}>/ 100</div>
-              </div>
             </div>
 
             <a href={claim.prUrl} target="_blank" rel="noreferrer"
@@ -146,9 +135,6 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
               <ExternalLink size={12} style={{ color: "#a1a1aa", flexShrink: 0 }} />
             </a>
 
-            <p style={{ fontSize: "12px", color: "#71717a", marginTop: "12px", lineHeight: 1.6 }}>
-              {claim.reasoning}
-            </p>
           </div>
 
           {/* Reward + claim */}
@@ -222,7 +208,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                 </button>
 
                 <p style={{ fontSize: "11px", color: "#a1a1aa", marginTop: "10px", textAlign: "center" }}>
-                  Solana devnet only. Your score of {claim.score}/100 earns {amountEth} SOL.
+                  Solana devnet only. Your reward is {amountEth} SOL.
                 </p>
               </>
             )}

@@ -49,8 +49,7 @@ Respond with ONLY this JSON (no markdown, no code fences):
       });
 
       let text = Array.isArray(output) ? output.join("") : String(output);
-      console.log(`[scorer] raw output:`, text.slice(0, 300));
-      text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+text = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       const match = text.match(/\{[\s\S]*\}/);
       if (match) text = match[0];
 
@@ -62,8 +61,7 @@ Respond with ONLY this JSON (no markdown, no code fences):
           category: result.category,
         };
       }
-    } catch (e) {
-      console.error(`[scorer] attempt ${attempt} failed:`, e);
+    } catch {
       if (attempt === 2) break;
     }
   }
