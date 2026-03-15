@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionId } from "@/lib/session";
+import { getSessionId, clearUserCookie } from "@/lib/session";
 import { kvSet, getConnectedRepos, removeConnectedRepo } from "@/lib/store";
 import { getOrigin } from "@/lib/origin";
 
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     for (const repo of repos) await removeConnectedRepo(repo, sid);
   }
 
-  const res = NextResponse.redirect(`${origin}/setup`);
-  res.cookies.set("gp_sid", "", { maxAge: 0, path: "/" });
+  const res = NextResponse.redirect(`${origin}/login`);
+  clearUserCookie(res);
   return res;
 }
