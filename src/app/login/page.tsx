@@ -25,127 +25,71 @@ export default function LoginPage() {
   }, [router]);
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      background: "#fafafa",
-      fontFamily: "inherit",
-    }}>
-      {/* Left panel */}
+    <div style={{ minHeight: "100vh", display: "flex", fontFamily: "inherit" }}>
+      {/* Left */}
       <div style={{
-        width: "420px",
-        minWidth: "420px",
-        background: "#000",
-        display: "flex",
-        flexDirection: "column",
-        padding: "48px 40px",
+        width: "50%", background: "#000",
+        display: "flex", flexDirection: "column", padding: "48px 56px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "64px" }}>
           <GitPayLogo />
-          <span style={{ fontWeight: 600, fontSize: "15px", color: "#fff", letterSpacing: "-0.01em" }}>
-            GitPay
-          </span>
+          <span style={{ fontWeight: 600, fontSize: "15px", color: "#fff", letterSpacing: "-0.01em" }}>GitPay</span>
         </div>
 
-        <div style={{ marginBottom: "auto", paddingTop: "60px" }}>
-          <p style={{ fontSize: "28px", fontWeight: 600, color: "#fff", lineHeight: 1.3, margin: "0 0 16px" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontSize: "30px", fontWeight: 600, color: "#fff", lineHeight: 1.25, margin: "0 0 20px" }}>
             Autonomous rewards for open source contributors
           </p>
-          <p style={{ fontSize: "14px", color: "#71717a", lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: "14px", color: "#71717a", lineHeight: 1.7, margin: "0 0 48px" }}>
             Connect your GitHub org, GitPay watches for PRs, scores them with AI, and pays contributors in SOL automatically.
           </p>
-        </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          {[
-            ["AI Scoring", "Every PR is scored by Gemini based on quality and impact"],
-            ["Instant Payouts", "Contributors claim SOL directly to their wallet"],
-            ["Zero Config", "Install a webhook, the rest is automatic"],
-          ].map(([title, desc]) => (
-            <div key={title} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", marginTop: "5px", flexShrink: 0 }} />
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 500, color: "#fff", marginBottom: "2px" }}>{title}</div>
-                <div style={{ fontSize: "12px", color: "#71717a" }}>{desc}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {[
+              ["AI Scoring", "Every PR graded by Gemini on quality and impact"],
+              ["Instant Payouts", "Contributors claim SOL directly to their wallet"],
+              ["Zero Config", "Install a webhook and the rest is automatic"],
+            ].map(([title, desc]) => (
+              <div key={title} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff", marginTop: "6px", flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: "13px", fontWeight: 500, color: "#fff", marginBottom: "2px" }}>{title}</div>
+                  <div style={{ fontSize: "12px", color: "#71717a" }}>{desc}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Right panel */}
+      {/* Right */}
       <div style={{
-        flex: 1,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px",
+        width: "50%", background: "#fafafa",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: "40px",
       }}>
-        <div style={{ width: "100%", maxWidth: "360px" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: 600, color: "#000", margin: "0 0 6px" }}>
-            Create your account
+        <div style={{ width: "100%", maxWidth: "320px" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: 600, color: "#000", margin: "0 0 8px" }}>
+            Sign in to GitPay
           </h1>
-          <p style={{ fontSize: "13px", color: "#71717a", margin: "0 0 32px" }}>
-            Sign in with GitHub to get started. Your account is tied to your GitHub identity.
+          <p style={{ fontSize: "13px", color: "#71717a", margin: "0 0 32px", lineHeight: 1.6 }}>
+            Use your GitHub account. If you don&apos;t have a GitPay account yet, one will be created automatically.
           </p>
 
           <a
             href="/api/github/auth"
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px",
-              width: "100%",
-              padding: "11px 20px",
-              background: "#000",
-              color: "#fff",
-              borderRadius: "8px",
-              fontSize: "14px",
-              fontWeight: 500,
-              textDecoration: "none",
-              boxSizing: "border-box",
-            }}
-          >
-            <Github size={16} />
-            Continue with GitHub
-          </a>
-
-          <div style={{ margin: "24px 0", borderTop: "1px solid #e4e4e7", position: "relative" }}>
-            <span style={{
-              position: "absolute", top: "-9px", left: "50%", transform: "translateX(-50%)",
-              background: "#fafafa", padding: "0 10px",
-              fontSize: "11px", color: "#a1a1aa",
-            }}>
-              already have an account?
-            </span>
-          </div>
-
-          <a
-            href="/api/github/auth"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px",
-              width: "100%",
-              padding: "10px 20px",
-              background: "#fff",
-              color: "#000",
-              borderRadius: "8px",
-              fontSize: "14px",
-              fontWeight: 500,
-              textDecoration: "none",
-              boxSizing: "border-box",
-              border: "1px solid #e4e4e7",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+              width: "100%", padding: "11px 20px", background: "#000", color: "#fff",
+              borderRadius: "8px", fontSize: "14px", fontWeight: 500,
+              textDecoration: "none", boxSizing: "border-box",
             }}
           >
             <Github size={16} />
             Sign in with GitHub
           </a>
 
-          <p style={{ fontSize: "12px", color: "#a1a1aa", marginTop: "24px", lineHeight: 1.6, textAlign: "center" }}>
-            By continuing, you authorize GitPay to read your repositories and install webhooks on your behalf.
+          <p style={{ fontSize: "11px", color: "#a1a1aa", marginTop: "20px", lineHeight: 1.6, textAlign: "center" }}>
+            By signing in you authorize GitPay to read your repositories and install webhooks.
           </p>
         </div>
       </div>
