@@ -53,20 +53,14 @@ export function buildClaimComment(
   category: string,
   claimUrl: string
 ): string {
-  const label = category.replace("_", " ");
+  void score; void reasoning; void category;
+  return `Hey @${username}, thanks for your contribution!
 
-  return `**GitPay** reviewed this pull request.
+GitPay has reviewed your pull request. You can claim your SOL reward using the link below — just connect your Solana wallet and you're good to go.
 
-| | |
-|---|---|
-| Score | **${score} / 100** |
-| Category | ${label} |
-
-${reasoning}
-
-Thanks for the contribution, @${username}. [Claim your reward](${claimUrl}) on Solana.
+**[Claim your reward →](${claimUrl})**
 
 ---
 
-<sub>Scored by Gemini · Paid out by GitPay</sub>`;
+<sub>Powered by GitPay · Paid out on Solana</sub>`;
 }

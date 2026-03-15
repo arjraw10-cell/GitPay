@@ -4,13 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Github } from "lucide-react";
 
-const GitPayLogo = () => (
+const GitPayLogoBlack = () => (
   <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="9" cy="3.5" r="2" fill="#fff" />
-    <circle cx="3.5" cy="14.5" r="2" fill="#fff" />
-    <circle cx="14.5" cy="14.5" r="2" fill="#fff" />
-    <line x1="9" y1="5.5" x2="3.5" y2="12.5" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" />
-    <line x1="9" y1="5.5" x2="14.5" y2="12.5" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" />
+    <circle cx="9" cy="3.5" r="2" fill="#000" />
+    <circle cx="3.5" cy="14.5" r="2" fill="#000" />
+    <circle cx="14.5" cy="14.5" r="2" fill="#000" />
+    <line x1="9" y1="5.5" x2="3.5" y2="12.5" stroke="#000" strokeWidth="1.4" strokeLinecap="round" />
+    <line x1="9" y1="5.5" x2="14.5" y2="12.5" stroke="#000" strokeWidth="1.4" strokeLinecap="round" />
   </svg>
 );
 
@@ -28,16 +28,16 @@ export default function LoginPage() {
     <div style={{ minHeight: "100vh", display: "flex", fontFamily: "inherit" }}>
       {/* Left */}
       <div style={{
-        width: "50%", background: "#000",
+        width: "50%", background: "#fff", borderRight: "1px solid #e4e4e7",
         display: "flex", flexDirection: "column", padding: "48px 56px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "64px" }}>
-          <GitPayLogo />
-          <span style={{ fontWeight: 600, fontSize: "15px", color: "#fff", letterSpacing: "-0.01em" }}>GitPay</span>
+          <GitPayLogoBlack />
+          <span style={{ fontWeight: 600, fontSize: "15px", color: "#000", letterSpacing: "-0.01em" }}>GitPay</span>
         </div>
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <p style={{ fontSize: "30px", fontWeight: 600, color: "#fff", lineHeight: 1.25, margin: "0 0 20px" }}>
+          <p style={{ fontSize: "30px", fontWeight: 600, color: "#000", lineHeight: 1.25, margin: "0 0 20px" }}>
             Autonomous rewards for open source contributors
           </p>
           <p style={{ fontSize: "14px", color: "#71717a", lineHeight: 1.7, margin: "0 0 48px" }}>
@@ -51,9 +51,9 @@ export default function LoginPage() {
               ["Zero Config", "Install a webhook and the rest is automatic"],
             ].map(([title, desc]) => (
               <div key={title} style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff", marginTop: "6px", flexShrink: 0 }} />
+                <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#000", marginTop: "6px", flexShrink: 0 }} />
                 <div>
-                  <div style={{ fontSize: "13px", fontWeight: 500, color: "#fff", marginBottom: "2px" }}>{title}</div>
+                  <div style={{ fontSize: "13px", fontWeight: 500, color: "#000", marginBottom: "2px" }}>{title}</div>
                   <div style={{ fontSize: "12px", color: "#71717a" }}>{desc}</div>
                 </div>
               </div>

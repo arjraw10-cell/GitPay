@@ -1,8 +1,8 @@
 import PocketBase from "pocketbase";
 
-const PB_URL = process.env.POCKETBASE_URL || "https://gitpocket.blipz.live";
-const PB_EMAIL = process.env.POCKETBASE_ADMIN_EMAIL || "4dennisk@gmail.com";
-const PB_PASSWORD = process.env.POCKETBASE_ADMIN_PASSWORD || "denniskhy11";
+const PB_URL = process.env.POCKETBASE_URL!;
+const PB_EMAIL = process.env.POCKETBASE_ADMIN_EMAIL!;
+const PB_PASSWORD = process.env.POCKETBASE_ADMIN_PASSWORD!;
 
 const g = global as typeof global & { _pb?: PocketBase };
 

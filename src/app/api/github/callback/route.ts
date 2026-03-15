@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
   const userId = userJson.login;
   await kvSet(`github_token:${userId}`, tokenData.access_token);
 
-  const redirect = NextResponse.redirect(`${origin}/setup`);
+  const redirect = NextResponse.redirect(`${origin}/`);
   setUserCookie(redirect, userId);
   return redirect;
 }

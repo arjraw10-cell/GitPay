@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .logo { fill: #fff; stroke: #fff; }
+    @media (prefers-color-scheme: light) {
+      .logo { fill: #000; stroke: #000; }
+    }
+  </style>
+  <circle class="logo" cx="32" cy="14" r="7"/>
+  <circle class="logo" cx="16" cy="50" r="7"/>
+  <circle class="logo" cx="48" cy="50" r="7"/>
+  <line class="logo" x1="32" y1="14" x2="16" y2="50" stroke-width="5" stroke-linecap="round"/>
+  <line class="logo" x1="32" y1="14" x2="48" y2="50" stroke-width="5" stroke-linecap="round"/>
+</svg>
