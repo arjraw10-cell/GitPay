@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrigin } from "@/lib/origin";
-import { setUserCookie } from "@/lib/session";
+import { clearOAuthState, getOAuthState, setUserCookie } from "@/lib/session";
 import { kvSet } from "@/lib/store";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
+  const state = req.nextUrl.searchParams.get("state") || "";
   const origin = getOrigin(req);
   const redirectUri = `${origin}/api/github/callback`;
   if (!code) return NextResponse.redirect(new URL(`/login?error=no_code`, origin));
+  if (!state || state !== getOAuthState(req)) {
+    return NextResponse.redirect(new URL(`/login?error=invalid_state`, origin));
+  }
 
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -38,5 +42,6 @@ export async function GET(req: NextRequest) {
 
   const redirect = NextResponse.redirect(new URL("/", origin));
   setUserCookie(redirect, userId);
+  clearOAuthState(redirect);
   return redirect;
 }

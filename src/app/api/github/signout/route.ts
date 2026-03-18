@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionId, clearUserCookie } from "@/lib/session";
+import { getSessionId, clearOAuthState, clearUserCookie } from "@/lib/session";
 import { kvSet, getConnectedRepos, removeConnectedRepo } from "@/lib/store";
 import { getOrigin } from "@/lib/origin";
 
@@ -15,5 +15,6 @@ export async function POST(req: NextRequest) {
 
   const res = NextResponse.redirect(`${origin}/login`);
   clearUserCookie(res);
+  clearOAuthState(res);
   return res;
 }

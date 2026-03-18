@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrigin } from "@/lib/origin";
-import { kvSet } from "@/lib/store";
+import { getConnectedRepos, kvSet, removeConnectedRepo } from "@/lib/store";
+import { clearOAuthState, clearUserCookie, getSessionId, setOAuthState } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
   const clientId = process.env.GITHUB_CLIENT_ID;
@@ -17,12 +18,21 @@ export async function GET(req: NextRequest) {
     redirect_uri: `${origin}/api/github/callback`,
   });
 
-  return NextResponse.redirect(new URL(`https://github.com/login/oauth/authorize?${params.toString()}`));
+  const response = NextResponse.redirect(new URL(`https://github.com/login/oauth/authorize?${params.toString()}`));
+  setOAuthState(response, state);
+  return response;
 }
 
-export async function DELETE() {
-  const g = global as typeof global & { _githubToken?: string };
-  g._githubToken = undefined;
-  await kvSet("github_token", "");
-  return NextResponse.json({ ok: true });
+export async function DELETE(req: NextRequest) {
+  const sid = getSessionId(req);
+  if (sid) {
+    await kvSet(`github_token:${sid}`, "");
+    const repos = await getConnectedRepos(sid);
+    for (const repo of repos) await removeConnectedRepo(repo, sid);
+  }
+
+  const response = NextResponse.json({ ok: true });
+  clearUserCookie(response);
+  clearOAuthState(response);
+  return response;
 }

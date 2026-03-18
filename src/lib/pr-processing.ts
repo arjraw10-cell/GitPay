@@ -4,8 +4,6 @@ import { scorePR } from "@/lib/scorer";
 import { addClaim, getTokenForRepo, getClaimByPR } from "@/lib/store";
 import { emitEvent } from "@/lib/events";
 
-const g = global as typeof global & { _githubToken?: string };
-
 export async function processPullRequestPayload(payload: Record<string, unknown>, appUrl: string) {
   const pr = payload.pull_request as Record<string, unknown>;
   const repoData = payload.repository as Record<string, unknown>;
@@ -28,10 +26,9 @@ export async function processPullRequestPayload(payload: Record<string, unknown>
   }
 
   const repoToken = await getTokenForRepo(repoFullName);
-  g._githubToken = repoToken;
   const [diff, files] = await Promise.all([
-    getPRDiff(owner, repoName, prNumber),
-    getPRFiles(owner, repoName, prNumber),
+    getPRDiff(owner, repoName, prNumber, repoToken),
+    getPRFiles(owner, repoName, prNumber, repoToken),
   ]);
 
   const scored = await scorePR({ title: prTitle, body: prBody, additions, deletions, changedFiles, files, diff });
@@ -57,7 +54,7 @@ export async function processPullRequestPayload(payload: Record<string, unknown>
 
   const commentBody = buildClaimComment(username, scored.score, scored.reasoning, scored.category, claimUrl);
   try {
-    await postPRComment(owner, repoName, prNumber, commentBody);
+    await postPRComment(owner, repoName, prNumber, commentBody, repoToken);
   } catch (err) {
     console.error("[pr] Failed to post comment:", err);
   }

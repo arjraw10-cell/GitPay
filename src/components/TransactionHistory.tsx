@@ -8,7 +8,7 @@ interface Transaction {
   txHash: string;
   githubUsername: string;
   walletAddress: string;
-  amountEth: string;
+  amountSol: string;
   scoreRedeemed: number;
   timestamp: string;
 }
@@ -90,7 +90,7 @@ export default function TransactionHistory() {
                         className="stat-num text-base font-semibold"
                         style={{ color: "#fff" }}
                       >
-                        {tx.amountEth} SOL
+                        {tx.amountSol} SOL
                       </span>
                     </div>
 

@@ -49,7 +49,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
   const [hasPhantom, setHasPhantom] = useState(false);
   const [connectingWallet, setConnectingWallet] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [result, setResult] = useState<{ txHash: string; explorerUrl: string; amountEth: string } | null>(null);
+  const [result, setResult] = useState<{ txHash: string; explorerUrl: string; amountSol: string } | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
     );
   }
 
-  const amountEth = rewardFromScore(claim.score);
+  const amountSol = rewardFromScore(claim.score);
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
@@ -221,7 +221,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                   <Check size={22} style={{ color: "#10b981" }} />
                 </div>
                 <div style={{ fontSize: "15px", fontWeight: 600, color: "#000", marginBottom: "4px" }}>
-                  {result.amountEth} SOL sent!
+                  {result.amountSol} SOL sent!
                 </div>
                 <p style={{ fontSize: "12px", color: "#71717a", marginBottom: "14px" }}>
                   Your reward was sent on Solana devnet.
@@ -238,7 +238,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "16px" }}>
-                  <div style={{ fontSize: "24px", fontWeight: 700, color: "#000" }}>{amountEth} SOL</div>
+                  <div style={{ fontSize: "24px", fontWeight: 700, color: "#000" }}>{amountSol} SOL</div>
                   <div style={{ fontSize: "12px", color: "#71717a" }}>on devnet</div>
                 </div>
 
@@ -325,7 +325,7 @@ export default function ClaimPage({ params }: { params: Promise<{ token: string 
                 </button>
 
                 <p style={{ fontSize: "11px", color: "#a1a1aa", marginTop: "10px", textAlign: "center" }}>
-                  Devnet payout only. Connect Phantom or paste a Solana address to receive {amountEth} SOL.
+                  Devnet payout only. Connect Phantom or paste a Solana address to receive {amountSol} SOL.
                 </p>
               </>
             )}

@@ -84,7 +84,7 @@ export interface Transaction {
   explorerUrl: string;
   githubUsername: string;
   walletAddress: string;
-  amountEth: string;
+  amountSol: string;
   score: number;
   repo: string;
   prUrl: string;
@@ -141,6 +141,7 @@ export async function getStats() {
     claimed: all.filter((c) => c.claimed).length,
     pending: all.filter((c) => !c.claimed).length,
     avgScore: all.length ? Math.round(all.reduce((s, c) => s + c.score, 0) / all.length) : 0,
+    totalScore: all.reduce((s, c) => s + c.score, 0),
   };
 }
 
@@ -185,7 +186,8 @@ export async function getTokenForRepo(repoFullName: string): Promise<string | un
 export interface LeaderboardEntry {
   githubUsername: string;
   totalScore: number;
-  totalPaidOut: number;
+  totalEarnedSol: number;
+  totalPaidOutSol: number;
   walletAddress?: string;
   flagged: boolean;
 }
@@ -197,12 +199,14 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     const existing = map.get(claim.githubUsername);
     if (existing) {
       existing.totalScore += claim.score;
+      existing.totalEarnedSol += claim.score * 0.0005;
       if (claim.walletAddress) existing.walletAddress = claim.walletAddress;
     } else {
       map.set(claim.githubUsername, {
         githubUsername: claim.githubUsername,
         totalScore: claim.score,
-        totalPaidOut: 0,
+        totalEarnedSol: claim.score * 0.0005,
+        totalPaidOutSol: 0,
         walletAddress: claim.walletAddress,
         flagged: false,
       });
@@ -210,7 +214,7 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   }
   for (const tx of txs) {
     const existing = map.get(tx.githubUsername);
-    if (existing) existing.totalPaidOut += parseFloat(tx.amountEth) * 1000;
+    if (existing) existing.totalPaidOutSol += parseFloat(tx.amountSol);
   }
   return Array.from(map.values()).sort((a, b) => b.totalScore - a.totalScore);
 }

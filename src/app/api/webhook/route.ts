@@ -17,6 +17,9 @@ export async function POST(req: NextRequest) {
   const sig = req.headers.get("x-hub-signature-256") ?? "";
   const event = req.headers.get("x-github-event") ?? "";
   const secret = process.env.GITHUB_WEBHOOK_SECRET ?? "";
+  if (!secret) {
+    return NextResponse.json({ error: "Webhook secret is not configured" }, { status: 500 });
+  }
 
   if (!validateSig(body, sig, secret)) return NextResponse.json({ error: "Bad signature" }, { status: 401 });
 

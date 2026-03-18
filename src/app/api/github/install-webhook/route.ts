@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
 
   const [owner, repo] = repoFullName.split("/");
   const appUrl = getOrigin(req);
-  const secret = process.env.GITHUB_WEBHOOK_SECRET || "gitpay-secret-2024";
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  if (!secret) {
+    return NextResponse.json({ error: "GITHUB_WEBHOOK_SECRET not configured" }, { status: 500 });
+  }
 
   const listRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/hooks`, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },

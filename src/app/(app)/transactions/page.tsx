@@ -10,7 +10,7 @@ interface Transaction {
   explorerUrl: string;
   githubUsername: string;
   walletAddress: string;
-  amountEth: string;
+  amountSol: string;
   score: number;
   repo: string;
   prUrl: string;
@@ -56,7 +56,7 @@ export default function TransactionsPage() {
       <div style={{ flex: 1, overflowY: "auto", padding: "28px 40px 48px" }}>
 
         {txs.length > 0 && (() => {
-          const total = txs.reduce((s, t) => s + parseFloat(t.amountEth), 0).toFixed(4);
+          const total = txs.reduce((s, t) => s + parseFloat(t.amountSol), 0).toFixed(4);
           const avg = (parseFloat(total) / txs.length).toFixed(4);
           return (
             <div style={{ display: "flex", gap: "12px", marginBottom: "24px", maxWidth: "800px" }}>
@@ -149,7 +149,7 @@ export default function TransactionsPage() {
                   </div>
 
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#10b981", textAlign: "right" }}>
-                    {tx.amountEth} SOL
+                    {tx.amountSol} SOL
                   </div>
                 </div>
               ))}

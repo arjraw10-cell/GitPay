@@ -1,14 +1,12 @@
 import { Octokit } from "@octokit/rest";
 
-const g = global as typeof global & { _githubToken?: string };
-
-function getOctokit() {
-  return new Octokit({ auth: g._githubToken });
+function getOctokit(token?: string) {
+  return new Octokit({ auth: token });
 }
 
-export async function getPRDiff(owner: string, repo: string, pullNumber: number): Promise<string> {
+export async function getPRDiff(owner: string, repo: string, pullNumber: number, token?: string): Promise<string> {
   try {
-    const { data } = await getOctokit().pulls.get({
+    const { data } = await getOctokit(token).pulls.get({
       owner,
       repo,
       pull_number: pullNumber,
@@ -20,9 +18,9 @@ export async function getPRDiff(owner: string, repo: string, pullNumber: number)
   }
 }
 
-export async function getPRFiles(owner: string, repo: string, pullNumber: number) {
+export async function getPRFiles(owner: string, repo: string, pullNumber: number, token?: string) {
   try {
-    const { data } = await getOctokit().pulls.listFiles({
+    const { data } = await getOctokit(token).pulls.listFiles({
       owner,
       repo,
       pull_number: pullNumber,
@@ -44,9 +42,10 @@ export async function postPRComment(
   owner: string,
   repo: string,
   pullNumber: number,
-  body: string
+  body: string,
+  token?: string
 ): Promise<void> {
-  await getOctokit().issues.createComment({
+  await getOctokit(token).issues.createComment({
     owner,
     repo,
     issue_number: pullNumber,

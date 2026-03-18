@@ -5,31 +5,29 @@ import { useEffect, useState } from "react";
 interface Contributor {
   githubUsername: string;
   totalScore: number;
-  totalPaidOut: number;
+  totalEarnedSol: number;
+  totalPaidOutSol: number;
   walletAddress?: string;
   flagged: boolean;
 }
 
 function shortenAddr(a?: string) {
-  if (!a) return "—";
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  if (!a) return "--";
+  return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
-function pendingEth(pendingScore: number, totalScore: number): string {
-  if (totalScore === 0) return "0";
-  return ((pendingScore / totalScore) * 0.005).toFixed(5);
+function pendingSol(totalEarnedSol: number, totalPaidOutSol: number): string {
+  return Math.max(0, totalEarnedSol - totalPaidOutSol).toFixed(5);
 }
 
 export default function Leaderboard() {
   const [board, setBoard] = useState<Contributor[]>([]);
-  const [totalScore, setTotalScore] = useState(1);
 
   const load = async () => {
     try {
       const res = await fetch("/api/leaderboard");
-      const { leaderboard, stats } = await res.json();
+      const { leaderboard } = await res.json();
       setBoard(leaderboard);
-      setTotalScore(stats.totalScore || 1);
     } catch {}
   };
 
@@ -43,7 +41,7 @@ export default function Leaderboard() {
     const es = new EventSource("/api/sse");
     es.onmessage = (e) => {
       const { type } = JSON.parse(e.data);
-      if (type === "contribution" || type === "payout") load();
+      if (type === "contribution" || type === "payout" || type === "claimed") load();
     };
     return () => es.close();
   }, []);
@@ -58,7 +56,6 @@ export default function Leaderboard() {
       </div>
 
       <div className="card overflow-hidden">
-        {/* Header */}
         <div
           className="grid px-4 py-2.5 text-xs border-b"
           style={{
@@ -86,8 +83,8 @@ export default function Leaderboard() {
 
         {board.map((c, i) => {
           const barPct = (c.totalScore / max) * 100;
-          const pending = Math.max(0, c.totalScore - c.totalPaidOut);
-          const eth = pendingEth(pending, totalScore);
+          const pending = Math.max(0, c.totalEarnedSol - c.totalPaidOutSol);
+          const payout = pendingSol(c.totalEarnedSol, c.totalPaidOutSol);
 
           return (
             <div
@@ -98,7 +95,6 @@ export default function Leaderboard() {
                 borderColor: "#151515",
               }}
             >
-              {/* Rank */}
               <div
                 className="stat-num text-sm"
                 style={{ color: i < 3 ? "#fff" : "#333" }}
@@ -106,7 +102,6 @@ export default function Leaderboard() {
                 {i + 1}
               </div>
 
-              {/* Dev */}
               <div className="flex items-center gap-2.5">
                 <img
                   src={`https://github.com/${c.githubUsername}.png?size=32`}
@@ -129,7 +124,6 @@ export default function Leaderboard() {
                 </span>
               </div>
 
-              {/* Score bar */}
               <div className="flex items-center gap-2 pr-4">
                 <div
                   className="flex-1 h-1 rounded-full overflow-hidden"
@@ -154,7 +148,6 @@ export default function Leaderboard() {
                 </span>
               </div>
 
-              {/* Wallet */}
               <div
                 className="text-right text-xs opacity-30 group-hover:opacity-70 transition-opacity"
                 style={{
@@ -165,12 +158,11 @@ export default function Leaderboard() {
                 {shortenAddr(c.walletAddress)}
               </div>
 
-              {/* Payout */}
               <div
                 className="text-right text-xs stat-num"
                 style={{ color: pending > 0 ? "#aaa" : "#2a2a2a" }}
               >
-                {pending > 0 ? `${eth}` : "—"}
+                {pending > 0 ? payout : "--"}
               </div>
             </div>
           );

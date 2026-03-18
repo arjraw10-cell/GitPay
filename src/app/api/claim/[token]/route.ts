@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
     await addTransaction({
       txHash, explorerUrl,
       githubUsername: claim.githubUsername,
-      walletAddress: normalizedWallet, amountEth: amountSol,
+      walletAddress: normalizedWallet, amountSol,
       score: claim.score, repo: claim.repo, prUrl: claim.prUrl,
       timestamp: new Date().toISOString(),
     });
